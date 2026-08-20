@@ -3,8 +3,7 @@
   "version": "0.0.1",
   "license": "See license in LICENSE",
   "engines": {
-    "node": "^18.0.0 || ^20.0.0 || ^22.0.0 || ^24.0.0",
-    "npm": "^9.0.0 || ^10.0.0 || ^11.0.0"
+"node": ">=20.0.0",    "npm": "^9.0.0 || ^10.0.0 || ^11.0.0"
   },
   "ccExtensibility": {
     "extends": "@salesforce/retail-react-app",
@@ -17,8 +16,7 @@
     "lint": "pwa-kit-dev lint \"**/*.{js,jsx}\"",
     "push": "npm run build && pwa-kit-dev push",
     "test": "pwa-kit-dev test",
-    "build": "npm run build-translations && pwa-kit-dev build",
-    "start": "set -a; [ -f .env ] && . ./.env; set +a; cross-env NODE_ICU_DATA=node_modules/full-icu pwa-kit-dev start",
+"build": "npm run build-translations && npx pwa-kit-dev build",    "start": "set -a; [ -f .env ] && . ./.env; set +a; cross-env NODE_ICU_DATA=node_modules/full-icu pwa-kit-dev start",
     "format": "pwa-kit-dev format \"**/*.{js,jsx}\"",
     "lint:fix": "npm run lint -- --fix",
     "tail-logs": "pwa-kit-dev tail-logs",
