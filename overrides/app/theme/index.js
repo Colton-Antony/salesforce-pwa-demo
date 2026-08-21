@@ -51,12 +51,9 @@ import SocialIcons from '@salesforce/retail-react-app/app/theme/components/proje
 import SwatchGroup from '@salesforce/retail-react-app/app/theme/components/project/swatch-group'
 import ImageGallery from '@salesforce/retail-react-app/app/theme/components/project/image-gallery'
 import SearchSuggestions from '@salesforce/retail-react-app/app/theme/components/project/search-suggestions'
-import HorizontalSuggestions from '@salesforce/retail-react-app/app/theme/components/project/horizontal-suggestions'
+import HorizontalSuggestions from '@salesforce/retail-react-app/app/theme/components/project/search-suggestions'
 import SubscribeForm from '@salesforce/retail-react-app/app/theme/components/project/subscribe-form'
 
-// Please refer to the Chakra-Ui theme customization docs found
-// here https://chakra-ui.com/docs/theming/customize-theme to learn
-// more about extending and overriding themes for your project.
 export const overrides = {
     styles,
     layerStyles,
@@ -65,12 +62,19 @@ export const overrides = {
     space,
     gradients,
     shadows,
+    config: {
+        initialColorMode: 'light',
+        useSystemColorMode: false,
+    },
     components: {
-        // base components
         Accordion,
         Alert,
         Badge,
-        Button,
+        Button: {
+            defaultProps: {
+                colorScheme: 'brand',
+            },
+        },
         Checkbox,
         Container,
         Drawer,
@@ -83,8 +87,6 @@ export const overrides = {
         Select,
         Skeleton,
         Tooltip,
-
-        // project components
         App,
         Breadcrumb,
         Header,
