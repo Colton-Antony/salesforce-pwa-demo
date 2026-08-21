@@ -5,6 +5,6 @@
     "buildCommand": "npm install @formatjs/cli && chmod -R +x node_modules/.bin && npm run build"
   },
   "deploy": {
-    "startCommand": "npm start"
+    "startCommand": "chmod -R +x node_modules/.bin && npm start"
   }
 }
