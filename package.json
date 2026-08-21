@@ -13,7 +13,7 @@
     "@salesforce/retail-react-app": "10.2.0"
   },
   "scripts": {
-    "start": "sh node_modules/.bin/pwa-kit-dev start",
+    "start": "pwa-kit-dev start",
     "lint": "pwa-kit-dev lint \"**/*.{js,jsx}\"",
     "push": "npm run build && pwa-kit-dev push",
     "test": "pwa-kit-dev test",
