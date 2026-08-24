@@ -380,6 +380,11 @@ app.use((req, res, next) => {
         useDefaults: true,
         directives: {
             'img-src': [
+                "'self'",
+                'data:',
+                "https:",
+                // Allow images from the following domains for product images, payment gateways, and Commerce Client messaging widget
+                // Note: You may need to add additional domains based on your specific use case and integrations
                 // Default source for product images - replace with your CDN
                 '*.commercecloud.salesforce.com',
                 '*.demandware.net',
@@ -392,6 +397,7 @@ app.use((req, res, next) => {
                 'https://cdn.sanity.io'
             ],
             'script-src': [
+                "'self'",
                 // Commerce Client messaging widget bundle (messaging.umd.js)
                 '*.cimulate.ai',
                 // Commerce Client bundle served from the SFCC static CDN
