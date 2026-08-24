@@ -114,19 +114,30 @@ const Home = () => {
                 }
             />
 
-            {/* Live Sanity CMS Rollbacks Section */}
+           {/* Live Sanity CMS Rollbacks Section */}
             <Box p={6} bg="gray.50" my={6} borderRadius="md" maxW="container.xl" mx="auto">
                 <Heading size="md" mb={4}>Live Asda Rollbacks (from Sanity CMS)</Heading>
                 {offers.map(offer => (
-                    <Box key={offer._id} p={4} bg="white" boxShadow="sm" borderRadius="md" mb={3}>
-                        <Text fontWeight="bold" fontSize="lg">{offer.title}</Text>
-                        <Text color="green.600" fontSize="xl">
-                            Now: £{offer.newPrice}{' '}
-                            <Text as="span" textDecoration="line-through" color="gray.500" fontSize="md">
-                                Was: £{offer.oldPrice}
+                    <Box key={offer._id} p={4} bg="white" boxShadow="sm" borderRadius="md" mb={3} display="flex" alignItems="center" gap={4}>
+                        {offer.imageUrl && (
+                            <Box boxSize="80px" flexShrink={0}>
+                                <img 
+                                    src={offer.imageUrl} 
+                                    alt={offer.title} 
+                                    style={{width: '100%', height: '100%', objectFit: 'contain'}} 
+                                />
+                            </Box>
+                        )}
+                        <Box>
+                            <Text fontWeight="bold" fontSize="lg">{offer.title}</Text>
+                            <Text color="green.600" fontSize="xl">
+                                Now: £{offer.newPrice}{' '}
+                                <Text as="span" textDecoration="line-through" color="gray.500" fontSize="md">
+                                    Was: £{offer.oldPrice}
+                                </Text>
                             </Text>
-                        </Text>
-                        {offer.badgeText && <Badge colorScheme="green" mt={2}>{offer.badgeText}</Badge>}
+                            {offer.badgeText && <Badge colorScheme="green" mt={2}>{offer.badgeText}</Badge>}
+                        </Box>
                     </Box>
                 ))}
             </Box>
