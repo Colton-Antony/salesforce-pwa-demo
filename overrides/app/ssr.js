@@ -388,7 +388,7 @@ app.use((req, res, next) => {
                 'www.gstatic.com', // optional, if icon is on gstatic
                 // Commerce Client messaging widget images
                 'cimulate.ai',
-                '*.cimulate.ai'
+                '*.cimulate.ai',
                 'https://cdn.sanity.io'
             ],
             'script-src': [
