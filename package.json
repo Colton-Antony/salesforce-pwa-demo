@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "license": "See license in LICENSE",
   "engines": {
-"node": ">=20.0.0",    "npm": "^9.0.0 || ^10.0.0 || ^11.0.0"
+    "node": ">=20.0.0",
+    "npm": "^9.0.0 || ^10.0.0 || ^11.0.0"
   },
   "ccExtensibility": {
     "extends": "@salesforce/retail-react-app",
@@ -17,7 +18,8 @@
     "lint": "pwa-kit-dev lint \"**/*.{js,jsx}\"",
     "push": "npm run build && pwa-kit-dev push",
     "test": "pwa-kit-dev test",
-"build": "npm install -g @formatjs/cli && npm run build-translations && npx pwa-kit-dev build",    "format": "pwa-kit-dev format \"**/*.{js,jsx}\"",
+    "build": "npm install -g @formatjs/cli && npm run build-translations && npx pwa-kit-dev build",
+    "format": "pwa-kit-dev format \"**/*.{js,jsx}\"",
     "lint:fix": "npm run lint -- --fix",
     "tail-logs": "pwa-kit-dev tail-logs",
     "postinstall": "npm run compile-translations && npm run compile-translations:pseudo",
@@ -56,5 +58,8 @@
     "iOS >= 9.0",
     "Android >= 4.4.4",
     "last 4 ChromeAndroid versions"
-  ]
+  ],
+  "dependencies": {
+    "@sanity/client": "^8.2.0"
+  }
 }

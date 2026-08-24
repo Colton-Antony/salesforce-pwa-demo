@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React, {useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import {useIntl, FormattedMessage} from 'react-intl'
 import {useLocation} from 'react-router-dom'
 
 // Components
-import {Box, Button, Stack, Link} from '@salesforce/retail-react-app/app/components/shared/ui'
+import {Box, Button, Stack, Link, Text, Heading, Badge} from '@salesforce/retail-react-app/app/components/shared/ui'
 
 // Project Components
 import Hero from '@salesforce/retail-react-app/app/components/hero'
@@ -20,8 +20,9 @@ import ProductScroller from '@salesforce/retail-react-app/app/components/product
 // Others
 import {getAssetUrl} from '@salesforce/pwa-kit-react-sdk/ssr/universal/utils'
 
-//Hooks
+// Hooks
 import useEinstein from '@salesforce/retail-react-app/app/hooks/use-einstein'
+import {getRollbackOffers} from '../../utils/sanity'
 
 // Constants
 import {
@@ -46,15 +47,22 @@ const Home = () => {
     const einstein = useEinstein()
     const {pathname} = useLocation()
 
+    // State to hold Sanity promotions
+    const [offers, setOffers] = useState([])
+
+    useEffect(() => {
+        getRollbackOffers().then(data => {
+            console.log("Fetched Asda Promotions:", data)
+            setOffers(data)
+        })
+    }, [])
+
     // useServerContext is a special hook introduced in v3 PWA Kit SDK.
-    // It replaces the legacy `getProps` and provide a react hook interface for SSR.
-    // it returns the request and response objects on the server side,
-    // and these objects are undefined on the client side.
     const {res} = useServerContext()
     if (res) {
         res.set(
             'Cache-Control',
-            `s-maxage=${MAX_CACHE_AGE}, stale-while-revalidate={STALE_WHILE_REVALIDATE}`
+            `s-maxage=${MAX_CACHE_AGE}, stale-while-revalidate=${STALE_WHILE_REVALIDATE}`
         )
     }
 
@@ -105,6 +113,23 @@ const Home = () => {
                     </Stack>
                 }
             />
+
+            {/* Live Sanity CMS Rollbacks Section */}
+            <Box p={6} bg="gray.50" my={6} borderRadius="md" maxW="container.xl" mx="auto">
+                <Heading size="md" mb={4}>Live Asda Rollbacks (from Sanity CMS)</Heading>
+                {offers.map(offer => (
+                    <Box key={offer._id} p={4} bg="white" boxShadow="sm" borderRadius="md" mb={3}>
+                        <Text fontWeight="bold" fontSize="lg">{offer.title}</Text>
+                        <Text color="green.600" fontSize="xl">
+                            Now: £{offer.newPrice}{' '}
+                            <Text as="span" textDecoration="line-through" color="gray.500" fontSize="md">
+                                Was: £{offer.oldPrice}
+                            </Text>
+                        </Text>
+                        {offer.badgeText && <Badge colorScheme="green" mt={2}>{offer.badgeText}</Badge>}
+                    </Box>
+                ))}
+            </Box>
 
             {productSearchResult && (
                 <Section
