@@ -435,7 +435,7 @@ app.use((req, res, next) => {
                 'google.com/pay',
                 'google.com/pay/',
                 'www.google.com/pay',
-                'www.google.com/pay/'
+                'www.google.com/pay/',
                 'https://*.sanity.io',
                 'https://*.sanity.run'
             ],
