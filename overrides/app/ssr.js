@@ -416,6 +416,7 @@ app.use((req, res, next) => {
                 '*.demandware.net' // Used to load a valid payment scripts in test environment
             ],
             'connect-src': [
+                "'self'",
                 // Connect to Einstein APIs
                 'api.cquotient.com',
                 // Connect to Commerce Client widget APIs
