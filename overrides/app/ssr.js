@@ -389,6 +389,7 @@ app.use((req, res, next) => {
                 // Commerce Client messaging widget images
                 'cimulate.ai',
                 '*.cimulate.ai'
+                'https://cdn.sanity.io'
             ],
             'script-src': [
                 // Commerce Client messaging widget bundle (messaging.umd.js)
@@ -435,6 +436,8 @@ app.use((req, res, next) => {
                 'google.com/pay/',
                 'www.google.com/pay',
                 'www.google.com/pay/'
+                'https://*.sanity.io',
+                'https://*.sanity.run'
             ],
             'frame-src': [
                 // Allow frames from Salesforce site.com (Needed for MIAW)
