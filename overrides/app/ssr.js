@@ -359,7 +359,22 @@ const {handler} = runtime.createHandler(options, (app) => {
     app.use(express.json()) // To parse JSON payloads
     app.use(express.urlencoded({extended: true}))
     // Set default HTTP security headers required by PWA Kit
-    app.use(defaultPwaKitSecurityHeaders)
+    
+    // Allow Sanity CMS connections and images in Content Security Policy
+app.use((req, res, next) => {
+    const originalHeader = res.getHeader('Content-Security-Policy')
+    if (originalHeader) {
+        let updated = originalHeader
+        if (updated.includes('connect-src')) {
+            updated = updated.replace(/connect-src ([^;]+);/, "connect-src $1 https://*.sanity.io https://*.sanity.run;")
+        }
+        if (updated.includes('img-src')) {
+            updated = updated.replace(/img-src ([^;]+);/, "img-src $1 https://cdn.sanity.io;")
+        }
+        res.setHeader('Content-Security-Policy', updated)
+    }
+    next()
+})
     // Set custom HTTP security headers
     const contentSecurityPolicy = {
         useDefaults: true,
