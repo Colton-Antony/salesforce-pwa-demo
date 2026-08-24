@@ -118,7 +118,21 @@ const Home = () => {
             <Box p={6} bg="gray.50" my={6} borderRadius="md" maxW="container.xl" mx="auto">
                 <Heading size="md" mb={4}>Live Asda Rollbacks (from Sanity CMS)</Heading>
                 {offers.map(offer => (
-                    <Box key={offer._id} p={4} bg="white" boxShadow="sm" borderRadius="md" mb={3} display="flex" alignItems="center" gap={4}>
+                    <Box 
+                        key={offer._id} 
+                        as="a" 
+                        href={`/product/${offer.slug}`} 
+                        _hover={{textDecoration: 'none', shadow: 'md'}}
+                        p={4} 
+                        bg="white" 
+                        boxShadow="sm" 
+                        borderRadius="md" 
+                        mb={3} 
+                        display="flex" 
+                        alignItems="center" 
+                        gap={4}
+                        transition="all 0.2s"
+                    >
                         {offer.imageUrl && (
                             <Box boxSize="80px" flexShrink={0}>
                                 <img 
@@ -128,12 +142,12 @@ const Home = () => {
                                 />
                             </Box>
                         )}
-                        <Box>
-                            <Text fontWeight="bold" fontSize="lg">{offer.title}</Text>
+                        <Box flex="1">
+                            <Text fontWeight="bold" fontSize="lg" color="gray.800">{offer.title}</Text>
                             <Text color="green.600" fontSize="xl">
-                                Now: £{offer.newPrice}{' '}
+                                Now: £{Number(offer.newPrice).toFixed(2)}{' '}
                                 <Text as="span" textDecoration="line-through" color="gray.500" fontSize="md">
-                                    Was: £{offer.oldPrice}
+                                    Was: £{Number(offer.oldPrice).toFixed(2)}
                                 </Text>
                             </Text>
                             {offer.badgeText && <Badge colorScheme="green" mt={2}>{offer.badgeText}</Badge>}
