@@ -1,6 +1,6 @@
 import React from 'react'
-import { Box, Flex, Input, Link, Icon, Text } from '@salesforce/retail-react-app/app/components/shared/ui'
-import { SearchIcon, UserIcon, CartIcon, WishlistIcon, StorefrontIcon } from '@salesforce/retail-react-app/app/components/icons'
+import { Box, Flex, Input, Link, Text } from '@salesforce/retail-react-app/app/components/shared/ui'
+import { SearchIcon, UserIcon, BasketIcon, StoreIcon } from '@salesforce/retail-react-app/app/components/icons'
 
 const AsdaHeader = () => {
     return (
@@ -54,7 +54,7 @@ const AsdaHeader = () => {
                     </Box>
                 </Flex>
 
-                {/* Right Action Icons (Account, Wishlist, Store, Cart) */}
+                {/* Right Action Icons */}
                 <Flex alignItems="center" gap={6} color="gray.700">
                     <Link href="/account" display="flex" flexDirection="column" alignItems="center" _hover={{ color: '#78be20', textDecoration: 'none' }}>
                         <UserIcon boxSize={6} />
@@ -62,12 +62,12 @@ const AsdaHeader = () => {
                     </Link>
 
                     <Link href="/stores" display="flex" flexDirection="column" alignItems="center" _hover={{ color: '#78be20', textDecoration: 'none' }}>
-                        <StorefrontIcon boxSize={6} />
+                        <StoreIcon boxSize={6} />
                         <Text fontSize="xs" mt={1}>Stores</Text>
                     </Link>
 
                     <Link href="/cart" display="flex" flexDirection="column" alignItems="center" position="relative" _hover={{ color: '#78be20', textDecoration: 'none' }}>
-                        <CartIcon boxSize={6} />
+                        <BasketIcon boxSize={6} />
                         <Text fontSize="xs" mt={1}>Trolley</Text>
                     </Link>
                 </Flex>
