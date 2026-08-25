@@ -5,36 +5,13 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import React, {useEffect, useState} from 'react'
-import {useIntl, FormattedMessage} from 'react-intl'
-import {useLocation} from 'react-router-dom'
-
-// Components
 import {Box, Button, Stack, Link, Text, Heading, SimpleGrid} from '@salesforce/retail-react-app/app/components/shared/ui'
 
-// Project Components
-import Hero from '@salesforce/retail-react-app/app/components/hero'
+// Seo Component
 import Seo from '@salesforce/retail-react-app/app/components/seo'
-import Section from '@salesforce/retail-react-app/app/components/section'
-import ProductScroller from '@salesforce/retail-react-app/app/components/product-scroller'
 
-// Others
-import {getAssetUrl} from '@salesforce/pwa-kit-react-sdk/ssr/universal/utils'
-
-// Hooks
-import useEinstein from '@salesforce/retail-react-app/app/hooks/use-einstein'
+// Sanity Client
 import {createClient} from '@sanity/client'
-
-// Constants
-import {
-    CUSTOM_HOME_TITLE,
-    HOME_SHOP_PRODUCTS_CATEGORY_ID,
-    HOME_SHOP_PRODUCTS_LIMIT,
-    MAX_CACHE_AGE,
-    STALE_WHILE_REVALIDATE
-} from '../../constants'
-
-import {useServerContext} from '@salesforce/pwa-kit-react-sdk/ssr/universal/hooks'
-import {useProductSearch} from '@salesforce/commerce-sdk-react'
 
 const client = createClient({
     projectId: 'ogtlyxao',
@@ -44,12 +21,8 @@ const client = createClient({
 })
 
 const Home = () => {
-    const intl = useIntl()
-    const einstein = useEinstein()
-    const {pathname} = useLocation()
-
-    // State to hold Sanity promotions
     const [offers, setOffers] = useState([])
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const fetchRollbacks = async () => {
@@ -68,64 +41,47 @@ const Home = () => {
                 setOffers(data || [])
             } catch (err) {
                 console.error("Error fetching homepage rollbacks from Sanity:", err)
+            } finally {
+                setLoading(false)
             }
         }
         fetchRollbacks()
     }, [])
 
-    const {res} = useServerContext()
-    if (res) {
-        res.set(
-            'Cache-Control',
-            `s-maxage=${MAX_CACHE_AGE}, stale-while-revalidate=${STALE_WHILE_REVALIDATE}`
-        )
-    }
-
-    const {data: productSearchResult, isLoading} = useProductSearch({
-        parameters: {
-            refine: [`cgid=${HOME_SHOP_PRODUCTS_CATEGORY_ID}`, 'htype=master'],
-            expand: ['promotions', 'variations', 'prices', 'images', 'custom_properties'],
-            perPricebook: true,
-            allVariationProperties: true,
-            limit: HOME_SHOP_PRODUCTS_LIMIT
-        }
-    })
-
-    useEffect(() => {
-        einstein.sendViewPage(pathname)
-    }, [])
-
     return (
-        <Box data-testid="home-page" layerStyle="page" bg="white">
+        <Box data-testid="home-page" layerStyle="page" bg="white" minH="100vh">
             <Seo
                 title="Online Food Shopping - ASDA Groceries"
-                description="Shop online at ASDA Groceries. The same great prices as in store, delivered to your door or click and collect from store."
+                description="Shop online at ASDA Groceries. Rollbacks powered by Sanity CMS."
             />
 
-            <Hero
-                title={CUSTOM_HOME_TITLE}
-                img={{
-                    src: getAssetUrl('static/img/hero.png'),
-                    alt: 'Asda Hero Banner'
-                }}
-            />
+            {/* Asda Hero Banner Area */}
+            <Box bg="#78be20" color="white" py={12} px={4} textAlign="center">
+                <Heading size="2xl" mb={3} fontWeight="black">Rollback & Save</Heading>
+                <Text fontSize="lg">The same great prices, managed dynamically via Headless CMS.</Text>
+            </Box>
 
-            {/* Asda-Styled Dynamic Sanity Grid Layout */}
+            {/* Live Sanity Rollbacks Grid */}
             <Box maxW="1432px" mx="auto" px={4} py={8}>
                 <Heading 
                     as="h2" 
                     fontSize={{base: '20px', md: '24px'}} 
                     fontWeight="600" 
-                    color="black" 
+                    color="gray.800" 
                     mb={6}
+                    borderBottom="2px solid #78be20"
+                    pb={2}
+                    width="fit-content"
                 >
-                    Live Asda Rollbacks & Offers
+                    Live Asda Rollbacks (Sanity CMS)
                 </Heading>
 
-                {offers.length === 0 ? (
-                    <Text color="gray.500" py={4}>Loading live rollbacks from Sanity CMS...</Text>
+                {loading ? (
+                    <Text color="gray.500" py={4}>Loading live rollbacks from Sanity...</Text>
+                ) : offers.length === 0 ? (
+                    <Text color="gray.500" py={4}>No rollbacks found. Add some in your Sanity Studio dashboard!</Text>
                 ) : (
-                    <SimpleGrid columns={{base: 1, md: 2, lg: 3}} spacing={4}>
+                    <SimpleGrid columns={{base: 1, md: 2, lg: 3}} spacing={6}>
                         {offers.map((item) => (
                             <Link 
                                 key={item._id} 
@@ -137,18 +93,19 @@ const Home = () => {
                                 <Box 
                                     bg="white" 
                                     border="1px solid" 
-                                    borderColor="gray.300" 
+                                    borderColor="gray.200" 
                                     borderRadius="8px" 
                                     overflow="hidden"
                                     height="100%"
                                     display="flex"
                                     flexDirection="column"
+                                    justifyContent="space-between"
+                                    boxShadow="sm"
                                     transition="all 0.2s"
-                                    _hover={{shadow: 'md', borderColor: 'gray.500'}}
+                                    _hover={{shadow: 'md', borderColor: '#78be20'}}
                                 >
-                                    {/* Image Wrapper matching Asda aspect ratios */}
                                     {item.imageUrl && (
-                                        <Box position="relative" w="full" pb="56.25%" bg="gray.100">
+                                        <Box position="relative" w="full" pb="56.25%" bg="gray.50">
                                             <img 
                                                 src={item.imageUrl} 
                                                 alt={item.title} 
@@ -158,35 +115,35 @@ const Home = () => {
                                                     left: 0,
                                                     width: '100%',
                                                     height: '100%',
-                                                    objectFit: 'cover'
+                                                    objectFit: 'contain',
+                                                    padding: '16px'
                                                 }} 
                                             />
                                         </Box>
                                     )}
 
-                                    {/* Content Container */}
-                                    <Box p={4} display="flex" flexDirection="column" flex="1" justifyContent="space-between">
+                                    <Box p={5} display="flex" flexDirection="column" flex="1" justifyContent="space-between">
                                         <Box>
                                             {item.badgeText && (
                                                 <Text 
                                                     bg="#78be20" 
                                                     color="white" 
-                                                    px={2} 
+                                                    px={2.5} 
                                                     py={0.5} 
                                                     borderRadius="full" 
                                                     fontSize="xs" 
                                                     fontWeight="bold" 
                                                     width="fit-content" 
-                                                    mb={2}
+                                                    mb={3}
                                                 >
                                                     {item.badgeText}
                                                 </Text>
                                             )}
-                                            <Text fontSize="18px" fontWeight="600" color="gray.700" mb={2} noOfLines={2}>
-                                                {item.title} ›
-                                            </Text>
-                                            <Box display="flex" alignItems="baseline" gap={2} mb={3}>
-                                                <Text fontSize="22px" fontWeight="black" color="#00a1de">
+                                            <Heading size="sm" color="gray.900" mb={3} noOfLines={2}>
+                                                {item.title}
+                                            </Heading>
+                                            <Box display="flex" alignItems="baseline" gap={2} mb={4}>
+                                                <Text fontSize="2xl" fontWeight="black" color="#00a1de">
                                                     £{Number(item.newPrice).toFixed(2)}
                                                 </Text>
                                                 <Text fontSize="sm" textDecoration="line-through" color="gray.500">
@@ -195,9 +152,16 @@ const Home = () => {
                                             </Box>
                                         </Box>
 
-                                        <Text fontSize="sm" fontWeight="bold" color="blue.500" mt={2}>
-                                            {item.ctaText || 'Shop now'} ›
-                                        </Text>
+                                        <Button 
+                                            bg="#78be20" 
+                                            color="white" 
+                                            width="full" 
+                                            size="sm" 
+                                            fontWeight="bold"
+                                            _hover={{bg: '#6aa61b'}}
+                                        >
+                                            {item.ctaText || 'View Rollback'} ›
+                                        </Button>
                                     </Box>
                                 </Box>
                             </Link>
@@ -205,30 +169,10 @@ const Home = () => {
                     </SimpleGrid>
                 )}
             </Box>
-
-            {/* Standard Catalog Products Section */}
-            {productSearchResult && (
-                <Section
-                    padding={4}
-                    paddingTop={16}
-                    title={intl.formatMessage({
-                        defaultMessage: 'Shop Products',
-                        id: 'home.heading.shop_products'
-                    })}
-                >
-                    <Stack pt={8} spacing={16}>
-                        <ProductScroller
-                            products={productSearchResult?.hits}
-                            isLoading={isLoading}
-                        />
-                    </Stack>
-                </Section>
-            )}
         </Box>
     )
 }
 
 Home.getTemplateName = () => 'home'
 
-exports = Home
 export default Home
