@@ -121,7 +121,7 @@ const Home = () => {
                     <Box 
                         key={offer._id} 
                         as="a" 
-                        href={`/product/${offer.slug}`} 
+                        href={`/rollback/${offer.slug}`}
                         _hover={{textDecoration: 'none', shadow: 'md'}}
                         p={4} 
                         bg="white" 
