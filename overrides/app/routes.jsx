@@ -16,12 +16,17 @@ import {routes as _routes} from '@salesforce/retail-react-app/app/routes'
 
 const fallback = <Skeleton height="75vh" width="100%" />
 
-// Create your pages here and add them to the routes array
-// Use loadable to split code into smaller js chunks
+// Loadable components for code-splitting
 const Home = loadable(() => import('./pages/home'), {fallback})
 const MyNewRoute = loadable(() => import('./pages/my-new-route'))
+const SanityProduct = loadable(() => import('./pages/sanity-product'), {fallback})
 
 const routes = [
+    {
+        path: '/rollback/:slug',
+        component: SanityProduct,
+        exact: true
+    },
     {
         path: '/',
         component: Home,
