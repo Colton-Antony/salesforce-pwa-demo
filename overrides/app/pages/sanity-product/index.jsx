@@ -14,6 +14,7 @@ const SanityProduct = () => {
     const { slug } = useParams()
     const [product, setProduct] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [added, setAdded] = useState(false)
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -38,6 +39,28 @@ const SanityProduct = () => {
         }
         fetchProduct()
     }, [slug])
+
+    const handleAddToCart = () => {
+        if (!product) return
+
+        // Retrieve existing trolley items from localStorage or initialize empty list
+        const existingCart = JSON.parse(localStorage.getItem('asda_sanity_cart') || '[]')
+        
+        // Check if item already exists in trolley, increment quantity if so
+        const existingIndex = existingCart.findIndex(item => item._id === product._id)
+        if (existingIndex > -1) {
+            existingCart[existingIndex].quantity = (existingCart[existingIndex].quantity || 1) + 1
+        } else {
+            existingCart.push({ ...product, quantity: 1 })
+        }
+
+        // Save updated cart back to localStorage
+        localStorage.setItem('asda_sanity_cart', JSON.stringify(existingCart))
+        
+        // Trigger success button feedback
+        setAdded(true)
+        setTimeout(() => setAdded(false), 3000)
+    }
 
     if (loading) {
         return <Box p={10} textAlign="center"><Text>Loading product...</Text></Box>
@@ -98,17 +121,17 @@ const SanityProduct = () => {
 
                     <Box mt={8}>
                         <Button 
-                            bg="#78be20" 
+                            bg={added ? '#5a9217' : '#78be20'} 
                             color="white" 
                             size="lg" 
                             width="full" 
-                            _hover={{ bg: '#6aa61b' }}
+                            _hover={{ bg: added ? '#5a9217' : '#6aa61b' }}
                             fontSize="lg"
                             fontWeight="bold"
                             height="56px"
-                            onClick={() => alert(`Added ${product.title} to your Asda trolley!`)}
+                            onClick={handleAddToCart}
                         >
-                            {product.ctaText || 'Add to trolley'}
+                            {added ? '✓ Successfully added to trolley!' : (product.ctaText || 'Add to trolley')}
                         </Button>
                     </Box>
                 </Box>
