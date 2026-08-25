@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom'
 import { Box, Heading, Text, Button, Badge, Stack } from '@salesforce/retail-react-app/app/components/shared/ui'
 import { createClient } from '@sanity/client'
 
-// Initialize Sanity client for fetching the single product
 const client = createClient({
     projectId: 'ogtlyxao',
     dataset: 'production',
@@ -50,7 +49,6 @@ const SanityProduct = () => {
 
     return (
         <Box maxW="container.xl" mx="auto" p={{ base: 4, md: 8 }}>
-            {/* Asda-style breadcrumb / category bar */}
             <Text fontSize="sm" color="gray.600" mb={6}>
                 Home &gt; Groceries &gt; Tinned Food &gt; {product.title}
             </Text>
@@ -65,7 +63,6 @@ const SanityProduct = () => {
                 border="1px solid"
                 borderColor="gray.100"
             >
-                {/* Product Image */}
                 {product.imageUrl && (
                     <Box flex="1" textAlign="center" p={4} bg="gray.50" borderRadius="md">
                         <img 
@@ -76,7 +73,6 @@ const SanityProduct = () => {
                     </Box>
                 )}
 
-                {/* Product Details - Asda Theme */}
                 <Box flex="1" display="flex" flexDirection="column" justifyContent="space-between">
                     <Stack spacing={4}>
                         {product.badgeText && (
@@ -87,7 +83,6 @@ const SanityProduct = () => {
                         <Heading size="xl" color="gray.900">{product.title}</Heading>
                         <Text fontSize="sm" color="gray.500">Product code: SANITY-{product._id.slice(-6).toUpperCase()}</Text>
 
-                        {/* Pricing Block */}
                         <Box bg="#f4f9ec" p={4} borderRadius="md" borderLeft="4px solid #78be20">
                             <Text color="gray.500" fontSize="sm" textTransform="uppercase" fontWeight="bold">Rollback Deal</Text>
                             <Box display="flex" alignItems="baseline" gap={3} mt={1}>
@@ -101,7 +96,6 @@ const SanityProduct = () => {
                         </Box>
                     </Stack>
 
-                    {/* Action Area (Asda Green Button) */}
                     <Box mt={8}>
                         <Button 
                             bg="#78be20" 
