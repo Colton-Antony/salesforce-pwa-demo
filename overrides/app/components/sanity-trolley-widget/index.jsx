@@ -36,8 +36,11 @@ const SanityTrolleyWidget = () => {
         }
     }, [])
 
-    const itemCount = cart.length
-    const subtotal = cart.reduce((acc, item) => acc + Number(item.newPrice || 0), 0)
+    const itemCount = cart.reduce((acc, item) => acc + (item.quantity || 1), 0)
+    const subtotal = cart.reduce((acc, item) => {
+        const price = Number(item.newPrice ?? item.price ?? 0)
+        return acc + (price * (item.quantity || 1))
+    }, 0)
 
     return (
         <Box position="relative" ref={dropdownRef} display="inline-block">
@@ -117,31 +120,31 @@ const SanityTrolleyWidget = () => {
 
                     <Box p={4} bg="gray.50" display="flex" flexDirection="column" gap={2}>
                         <Button 
+                            as="a"
+                            href="/cart"
                             variant="outline" 
                             borderColor="#78be20" 
                             color="#78be20" 
                             w="full" 
                             size="sm"
                             fontWeight="bold"
-                            _hover={{bg: '#f4fce8'}}
-                            onClick={() => {
-                                alert("Full trolley view coming soon!")
-                                setIsOpen(false)
-                            }}
+                            textAlign="center"
+                            _hover={{bg: '#f4fce8', textDecoration: 'none'}}
+                            onClick={() => setIsOpen(false)}
                         >
                             View full trolley
                         </Button>
                         <Button 
+                            as="a"
+                            href="/checkout"
                             bg="#00a1de" 
                             color="white" 
                             w="full" 
                             size="sm"
                             fontWeight="bold"
-                            _hover={{bg: '#008bbd'}}
-                            onClick={() => {
-                                alert("Proceeding to secure checkout demo!")
-                                setIsOpen(false)
-                            }}
+                            textAlign="center"
+                            _hover={{bg: '#008bbd', textDecoration: 'none'}}
+                            onClick={() => setIsOpen(false)}
                         >
                             Checkout
                         </Button>
