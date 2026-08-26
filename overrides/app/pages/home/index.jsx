@@ -10,16 +10,6 @@ import {Box, Button, Stack, Link, Text, Heading, SimpleGrid} from '@salesforce/r
 // Seo Component
 import Seo from '@salesforce/retail-react-app/app/components/seo'
 
-// Sanity Client
-import {createClient} from '@sanity/client'
-
-const client = createClient({
-    projectId: 'ogtlyxao',
-    dataset: 'production',
-    apiVersion: '2024-01-01',
-    useCdn: false
-})
-
 const Home = () => {
     const [offers, setOffers] = useState([])
     const [loading, setLoading] = useState(true)
@@ -27,7 +17,7 @@ const Home = () => {
     useEffect(() => {
         const fetchRollbacks = async () => {
             try {
-                const query = `*[_type == "rollbackOffer"]{
+                const query = encodeURIComponent(`*[_type == "rollbackOffer"]{
                     _id,
                     title,
                     "slug": slug.current,
@@ -36,11 +26,14 @@ const Home = () => {
                     newPrice,
                     badgeText,
                     ctaText
-                }`
-                const data = await client.fetch(query)
-                setOffers(data || [])
+                }`)
+                
+                // Fetch securely through the PWA Kit server proxy (Bypasses CSP & CORS)
+                const res = await fetch(`/mobify/proxy/sanity-api/v2024-01-01/data/query/production?query=${query}`)
+                const json = await res.json()
+                setOffers(json.result || [])
             } catch (err) {
-                console.error("Error fetching homepage rollbacks from Sanity:", err)
+                console.error("Error fetching homepage rollbacks from Sanity proxy:", err)
             } finally {
                 setLoading(false)
             }
