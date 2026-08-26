@@ -100,7 +100,7 @@ const Home = () => {
                                     {item.imageUrl && (
                                         <Box position="relative" w="full" pb="56.25%" bg="gray.50">
                                             <img 
-                                                src={item.imageUrl} 
+                                                src={item.imageUrl.replace('https://cdn.sanity.io', '/mobify/proxy/sanity-images')} 
                                                 alt={item.title} 
                                                 style={{
                                                     position: 'absolute',

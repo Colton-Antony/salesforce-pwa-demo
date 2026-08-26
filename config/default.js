@@ -189,8 +189,12 @@ module.exports = {
                 path: 'ocapi'
             },
             {
-                host: 'ogtlyxao.api.sanity.io', // <--- Add this line to proxy Sanity securely
+                host: 'ogtlyxao.api.sanity.io',
                 path: 'sanity-api'
+            },
+            {
+                host: 'cdn.sanity.io', // <--- Proxy Sanity images securely
+                path: 'sanity-images'
             }
         ]
     }
