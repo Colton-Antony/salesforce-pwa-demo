@@ -46,6 +46,10 @@ const SanityProduct = () => {
         const cart = JSON.parse(localStorage.getItem('asda_sanity_cart') || '[]')
         cart.push(product)
         localStorage.setItem('asda_sanity_cart', JSON.stringify(cart))
+        
+        // Dispatch custom event so header trolley updates instantly
+        window.dispatchEvent(new Event('sanity-cart-updated'))
+
         setAdded(true)
         setTimeout(() => setAdded(false), 2000)
     }

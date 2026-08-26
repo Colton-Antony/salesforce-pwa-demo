@@ -1,6 +1,13 @@
+/*
+ * Copyright (c) 2023, Salesforce, Inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
 import React from 'react'
 import { Box, Flex, Input, Link, Text } from '@salesforce/retail-react-app/app/components/shared/ui'
-import { SearchIcon, UserIcon, BasketIcon, StoreIcon } from '@salesforce/retail-react-app/app/components/icons'
+import { SearchIcon, UserIcon, StoreIcon } from '@salesforce/retail-react-app/app/components/icons'
+import SanityTrolleyWidget from '../sanity-trolley-widget'
 
 const AsdaHeader = () => {
     return (
@@ -66,10 +73,8 @@ const AsdaHeader = () => {
                         <Text fontSize="xs" mt={1}>Stores</Text>
                     </Link>
 
-                    <Link href="/cart" display="flex" flexDirection="column" alignItems="center" position="relative" _hover={{ color: '#78be20', textDecoration: 'none' }}>
-                        <BasketIcon boxSize={6} />
-                        <Text fontSize="xs" mt={1}>Trolley</Text>
-                    </Link>
+                    {/* Interactive Sanity Trolley Dropdown Widget */}
+                    <SanityTrolleyWidget />
                 </Flex>
             </Flex>
 
@@ -87,5 +92,7 @@ const AsdaHeader = () => {
         </Box>
     )
 }
+
+AsdaHeader.getTemplateName = () => 'AsdaHeader'
 
 export default AsdaHeader
