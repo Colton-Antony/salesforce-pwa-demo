@@ -24,10 +24,13 @@ const SanityProduct = () => {
                     title,
                     "slug": slug.current,
                     "imageUrl": mainImage.asset->url,
+                    isOnRollback,
+                    price,
                     oldPrice,
-                    newPrice,
                     badgeText,
-                    ctaText
+                    isFood,
+                    dietaryInfo,
+                    nutrition
                 }`)
                 const res = await fetch(`/mobify/proxy/sanity-api/v2024-01-01/data/query/production?query=${query}`)
                 const json = await res.json()
@@ -45,7 +48,8 @@ const SanityProduct = () => {
 
     const handleAddToCart = () => {
         const cart = JSON.parse(localStorage.getItem('asda_sanity_cart') || '[]')
-        cart.push(product)
+        // Ensure we store price correctly for cart totals
+        cart.push({...product, newPrice: product.price})
         localStorage.setItem('asda_sanity_cart', JSON.stringify(cart))
         window.dispatchEvent(new Event('sanity-cart-updated'))
         setAdded(true)
@@ -91,7 +95,7 @@ const SanityProduct = () => {
 
                     {/* Product Details & Purchase Box */}
                     <Box flex="1">
-                        {product.badgeText && (
+                        {product.isOnRollback && product.badgeText && (
                             <Text bg="#C21E4D" color="white" px={2.5} py={0.5} borderRadius="3px" fontSize="xs" fontWeight="600" width="fit-content" mb={3}>
                                 {product.badgeText}
                             </Text>
@@ -99,26 +103,22 @@ const SanityProduct = () => {
                         <Heading as="h1" fontSize={{base: '24px', md: '28px'}} fontWeight="600" color="black" mb={2}>
                             {product.title}
                         </Heading>
-                        <Text fontSize="sm" color="gray.500" mb={3}>415g</Text>
-
-                        {/* Reviews Mockup */}
-                        <Flex align="center" gap={2} mb={4}>
-                            <Text color="orange.400" fontSize="lg">★★★★★</Text>
-                            <Text fontSize="sm" color="blue.500" fontWeight="600" cursor="pointer">4.7 (152 reviews)</Text>
-                        </Flex>
+                        <Text fontSize="sm" color="gray.500" mb={3}>Standard Pack</Text>
 
                         <Divider mb={4} />
 
-                        {/* Pricing */}
+                        {/* Conditional Pricing based on Rollback status */}
                         <Flex align="baseline" gap={3} mb={1}>
-                            <Text fontSize="3xl" fontWeight="600" color="#222222">£{Number(product.newPrice).toFixed(2)}</Text>
-                            {product.oldPrice && (
-                                <Text fontSize="md" textDecoration="line-through" color="gray.500">Was £{Number(product.oldPrice).toFixed(2)}</Text>
+                            <Text fontSize="3xl" fontWeight="600" color="#222222">
+                                £{Number(product.price || 0).toFixed(2)}
+                            </Text>
+                            {product.isOnRollback && product.oldPrice && (
+                                <Text fontSize="md" textDecoration="line-through" color="gray.500">
+                                    Was £{Number(product.oldPrice).toFixed(2)}
+                                </Text>
                             )}
                         </Flex>
-                        <Text fontSize="xs" color="gray.500" mb={6}>(£3.33/kg)</Text>
 
-                        {/* Add to Trolley Button */}
                         <Button 
                             bg="#78be20" 
                             color="white" 
@@ -127,6 +127,7 @@ const SanityProduct = () => {
                             fontWeight="bold"
                             py={6}
                             fontSize="lg"
+                            mt={6}
                             _hover={{bg: '#68a51c'}}
                             onClick={handleAddToCart}
                         >
@@ -135,24 +136,41 @@ const SanityProduct = () => {
                     </Box>
                 </Flex>
 
-                {/* Dietary & Traffic Light Nutrition Section */}
-                <Box mt={12} pt={8} borderTop="1px solid" borderColor="gray.200">
-                    <Heading as="h2" size="md" mb={4}>Dietary and lifestyle</Heading>
-                    <Flex gap={4} mb={8}>
-                        <Text bg="gray.100" px={3} py={1} borderRadius="md" fontSize="sm">Low Fat</Text>
-                        <Text bg="gray.100" px={3} py={1} borderRadius="md" fontSize="sm">Suitable for Vegans</Text>
-                    </Flex>
+                {/* Conditional Food / Nutrition Section (Only appears if 'isFood' is checked in Sanity) */}
+                {product.isFood && (
+                    <Box mt={12} pt={8} borderTop="1px solid" borderColor="gray.200">
+                        {product.dietaryInfo && product.dietaryInfo.length > 0 && (
+                            <>
+                                <Heading as="h2" size="md" mb={4}>Dietary and lifestyle</Heading>
+                                <Flex gap={4} mb={8}>
+                                    {product.dietaryInfo.map((tag, idx) => (
+                                        <Text key={idx} bg="gray.100" px={3} py={1} borderRadius="md" fontSize="sm">{tag}</Text>
+                                    ))}
+                                </Flex>
+                            </>
+                        )}
 
-                    <Heading as="h2" size="md" mb={4}>Nutrition (Per 1/2 can)</Heading>
-                    <Flex gap={2} wrap="wrap" mb={8}>
-                        {[{label: 'Energy', val: '168kcal', col: 'gray.100'}, {label: 'Fat', val: '0.7g', col: '#538316', textCol: 'white'}, {label: 'Saturates', val: '0.1g', col: '#538316', textCol: 'white'}, {label: 'Sugars', val: '8.9g', col: '#538316', textCol: 'white'}, {label: 'Salt', val: '1.3g', col: '#F7CC00'}].map((nut, i) => (
-                            <Box key={i} bg={nut.col} color={nut.textCol || 'black'} p={3} borderRadius="4px 4px 20px 20px" textAlign="center" minW="80px" flex="1">
-                                <Text fontSize="xs" fontWeight="bold">{nut.label}</Text>
-                                <Text fontSize="sm" fontWeight="bold" my={2}>{nut.val}</Text>
-                            </Box>
-                        ))}
-                    </Flex>
-                </Box>
+                        {product.nutrition && (
+                            <>
+                                <Heading as="h2" size="md" mb={4}>Nutrition (Per Serving)</Heading>
+                                <Flex gap={2} wrap="wrap" mb={8}>
+                                    {[
+                                        {label: 'Energy', val: product.nutrition.energy || 'N/A', col: 'gray.100'}, 
+                                        {label: 'Fat', val: product.nutrition.fat || 'N/A', col: '#538316', textCol: 'white'}, 
+                                        {label: 'Saturates', val: product.nutrition.saturates || 'N/A', col: '#538316', textCol: 'white'}, 
+                                        {label: 'Sugars', val: product.nutrition.sugars || 'N/A', col: '#538316', textCol: 'white'}, 
+                                        {label: 'Salt', val: product.nutrition.salt || 'N/A', col: '#F7CC00'}
+                                    ].map((nut, i) => (
+                                        <Box key={i} bg={nut.col} color={nut.textCol || 'black'} p={3} borderRadius="4px 4px 20px 20px" textAlign="center" minW="80px" flex="1">
+                                            <Text fontSize="xs" fontWeight="bold">{nut.label}</Text>
+                                            <Text fontSize="sm" fontWeight="bold" my={2}>{nut.val}</Text>
+                                        </Box>
+                                    ))}
+                                </Flex>
+                            </>
+                        )}
+                    </Box>
+                )}
             </Box>
         </Box>
     )
