@@ -20,11 +20,23 @@ const fallback = <Skeleton height="75vh" width="100%" />
 const Home = loadable(() => import('./pages/home'), {fallback})
 const MyNewRoute = loadable(() => import('./pages/my-new-route'))
 const SanityProduct = loadable(() => import('./pages/sanity-product'), {fallback})
+const CartPage = loadable(() => import('./pages/cart'), {fallback})
+const CheckoutPage = loadable(() => import('./pages/checkout'), {fallback})
 
 const routes = [
     {
         path: '/rollback/:slug',
         component: SanityProduct,
+        exact: true
+    },
+    {
+        path: '/cart',
+        component: CartPage,
+        exact: true
+    },
+    {
+        path: '/checkout',
+        component: CheckoutPage,
         exact: true
     },
     {
