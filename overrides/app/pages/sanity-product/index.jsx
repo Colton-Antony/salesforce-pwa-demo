@@ -7,7 +7,7 @@ const client = createClient({
     projectId: 'ogtlyxao',
     dataset: 'production',
     apiVersion: '2024-01-01',
-    useCdn: true
+    useCdn: false
 })
 
 const SanityProduct = () => {
