@@ -152,8 +152,10 @@ module.exports = {
             'd32106rlhdcogo.cloudfront.net',
             'dgf0rw7orw6vf.cloudfront.net',
             '*.criteo.com',
+            'cdn.sanity.io',
             '*.sanity.io',
-            'cdn.sanity.io'
+            'https://cdn.sanity.io',
+            'https://*.sanity.io'
         ],
         isCspEnabled: true
     },
