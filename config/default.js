@@ -185,7 +185,10 @@ module.exports = {
             {
                 host: 'production-sitegenesis-dw.demandware.net',
                 path: 'ocapi'
+            },
+            {
+                host: 'ogtlyxao.api.sanity.io', // <--- Add this line to proxy Sanity securely
+                path: 'sanity-api'
             }
         ]
     }
-}
