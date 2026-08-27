@@ -4,12 +4,31 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Box, Flex, Input, Link, Text } from '@salesforce/retail-react-app/app/components/shared/ui'
 import { SearchIcon, UserIcon, StoreIcon } from '@salesforce/retail-react-app/app/components/icons'
 import SanityTrolleyWidget from '../sanity-trolley-widget'
 
-const AsdaHeader = ({ categories = [] }) => {
+const AsdaHeader = () => {
+    const [categories, setCategories] = useState([])
+
+    useEffect(() => {
+        // Fetch top-level categories (Super Departments) directly from Sanity API
+        const query = encodeURIComponent('*[_type == "categoryPage" && navigationLevel == "Super Department (Top Nav)"]{ _id, title, "slug": slug.current }')
+        
+        const projectId = 'ogtlyxao' 
+        const dataset = 'production'
+        
+        fetch(`https://${projectId}.api.sanity.io/v2023-05-03/data/query/${dataset}?query=${query}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.result) {
+                    setCategories(data.result)
+                }
+            })
+            .catch(err => console.error('Error fetching header categories from Sanity:', err))
+    }, [])
+
     return (
         <Box w="full" bg="white" boxShadow="sm" position="sticky" top={0} zIndex={1000}>
             {/* Top Announcement Bar */}
