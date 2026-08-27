@@ -13,16 +13,14 @@ const AsdaHeader = () => {
     const [categories, setCategories] = useState([])
 
     useEffect(() => {
-        // TEST QUERY: Fetch ALL categories to see what Sanity returns
-        const query = encodeURIComponent('*[_type == "categoryPage"]{ _id, title, "slug": slug.current, navigationLevel }')
+        // Fetch categories that DO NOT have a parent assigned (meaning they are Top Level!)
+        // We check common variations of the field name just to be safe.
+        const query = encodeURIComponent('*[_type == "categoryPage" && !defined(parentCategory) && !defined(parent) && !defined(parent_category)]{ _id, title, "slug": slug.current }')
         const dataset = 'production'
         
         fetch(`/mobify/proxy/sanity-api/v2023-05-03/data/query/${dataset}?query=${query}`)
             .then(res => res.json())
             .then(data => {
-                // LOG TO CONSOLE to inspect the exact property names and values!
-                console.log('🌟 SANITY FETCH RESULT:', data.result) 
-                
                 if (data.result) {
                     setCategories(data.result)
                 }
