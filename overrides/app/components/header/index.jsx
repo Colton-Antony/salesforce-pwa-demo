@@ -13,14 +13,16 @@ const AsdaHeader = () => {
     const [categories, setCategories] = useState([])
 
     useEffect(() => {
-        // Query for top-level categories
-        const query = encodeURIComponent('*[_type == "categoryPage" && navigationLevel == "Super Department (Top Nav)"]{ _id, title, "slug": slug.current }')
+        // TEST QUERY: Fetch ALL categories to see what Sanity returns
+        const query = encodeURIComponent('*[_type == "categoryPage"]{ _id, title, "slug": slug.current, navigationLevel }')
         const dataset = 'production'
         
-        // Added /mobify/proxy/ prefix so the PWA Kit server routes it to Sanity correctly
         fetch(`/mobify/proxy/sanity-api/v2023-05-03/data/query/${dataset}?query=${query}`)
             .then(res => res.json())
             .then(data => {
+                // LOG TO CONSOLE to inspect the exact property names and values!
+                console.log('🌟 SANITY FETCH RESULT:', data.result) 
+                
                 if (data.result) {
                     setCategories(data.result)
                 }
