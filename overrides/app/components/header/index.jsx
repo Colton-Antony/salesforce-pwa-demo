@@ -9,7 +9,7 @@ import { Box, Flex, Input, Link, Text } from '@salesforce/retail-react-app/app/c
 import { SearchIcon, UserIcon, StoreIcon } from '@salesforce/retail-react-app/app/components/icons'
 import SanityTrolleyWidget from '../sanity-trolley-widget'
 
-const AsdaHeader = () => {
+const AsdaHeader = ({ categories = [] }) => {
     return (
         <Box w="full" bg="white" boxShadow="sm" position="sticky" top={0} zIndex={1000}>
             {/* Top Announcement Bar */}
@@ -78,15 +78,18 @@ const AsdaHeader = () => {
                 </Flex>
             </Flex>
 
-            {/* Sub-Navigation Links Bar */}
+            {/* Dynamic Sub-Navigation Links Bar (Driven by Sanity Categories) */}
             <Box bg="#f8f9fa" borderTop="1px solid" borderColor="gray.200" px={4}>
                 <Flex maxW="container.xl" mx="auto" py={2} gap={8} fontSize="sm" fontWeight="semibold" color="gray.700" overflowX="auto">
-                    <Link href="/" _hover={{ color: '#78be20', textDecoration: 'none' }}>Groceries</Link>
-                    <Link href="/" _hover={{ color: '#78be20', textDecoration: 'none' }}>Rollbacks</Link>
-                    <Link href="/" _hover={{ color: '#78be20', textDecoration: 'none' }}>George Clothes</Link>
-                    <Link href="/" _hover={{ color: '#78be20', textDecoration: 'none' }}>Baby & Toddler</Link>
-                    <Link href="/" _hover={{ color: '#78be20', textDecoration: 'none' }}>Beer, Wine & Spirits</Link>
-                    <Link href="/" _hover={{ color: '#78be20', textDecoration: 'none' }}>Offers</Link>
+                    {categories && categories.map((cat) => (
+                        <Link 
+                            key={cat._id} 
+                            href={`/category/${cat.slug}`} 
+                            _hover={{ color: '#78be20', textDecoration: 'none' }}
+                        >
+                            {cat.title}
+                        </Link>
+                    ))}
                 </Flex>
             </Box>
         </Box>
