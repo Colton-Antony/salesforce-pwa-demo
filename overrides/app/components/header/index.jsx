@@ -17,8 +17,8 @@ const AsdaHeader = () => {
         const query = encodeURIComponent('*[_type == "categoryPage" && navigationLevel == "Super Department (Top Nav)"]{ _id, title, "slug": slug.current }')
         const dataset = 'production'
         
-        // Use your configured server proxy path to bypass browser CSP blocks entirely
-        fetch(`/sanity-api/v2023-05-03/data/query/${dataset}?query=${query}`)
+        // Added /mobify/proxy/ prefix so the PWA Kit server routes it to Sanity correctly
+        fetch(`/mobify/proxy/sanity-api/v2023-05-03/data/query/${dataset}?query=${query}`)
             .then(res => res.json())
             .then(data => {
                 if (data.result) {
