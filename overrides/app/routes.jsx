@@ -22,8 +22,14 @@ const MyNewRoute = loadable(() => import('./pages/my-new-route'))
 const SanityProduct = loadable(() => import('./pages/sanity-product'), {fallback})
 const CartPage = loadable(() => import('./pages/cart'), {fallback})
 const CheckoutPage = loadable(() => import('./pages/checkout'), {fallback})
+const CategoryPage = loadable(() => import('./pages/category'), {fallback})
 
 const routes = [
+    {
+        path: '/category/:slug',
+        component: CategoryPage,
+        exact: true
+    },
     {
         path: '/rollback/:slug',
         component: SanityProduct,
