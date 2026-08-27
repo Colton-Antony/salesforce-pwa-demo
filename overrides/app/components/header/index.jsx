@@ -13,20 +13,19 @@ const AsdaHeader = () => {
     const [categories, setCategories] = useState([])
 
     useEffect(() => {
-        // Fetch top-level categories (Super Departments) directly from Sanity API
+        // Query for top-level categories
         const query = encodeURIComponent('*[_type == "categoryPage" && navigationLevel == "Super Department (Top Nav)"]{ _id, title, "slug": slug.current }')
-        
-        const projectId = 'ogtlyxao' 
         const dataset = 'production'
         
-        fetch(`https://${projectId}.api.sanity.io/v2023-05-03/data/query/${dataset}?query=${query}`)
+        // Use your configured server proxy path to bypass browser CSP blocks entirely
+        fetch(`/sanity-api/v2023-05-03/data/query/${dataset}?query=${query}`)
             .then(res => res.json())
             .then(data => {
                 if (data.result) {
                     setCategories(data.result)
                 }
             })
-            .catch(err => console.error('Error fetching header categories from Sanity:', err))
+            .catch(err => console.error('Error fetching header categories from Sanity proxy:', err))
     }, [])
 
     return (
