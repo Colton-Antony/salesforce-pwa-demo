@@ -13,9 +13,18 @@ const AsdaHeader = () => {
     const [categories, setCategories] = useState([])
 
     useEffect(() => {
-        // Fetch categories that DO NOT have a parent assigned (meaning they are Top Level!)
-        // We check common variations of the field name just to be safe.
-        const query = encodeURIComponent('*[_type == "categoryPage" && !defined(parentCategory) && !defined(parent) && !defined(parent_category)]{ _id, title, "slug": slug.current }')
+        // We use references(^._id) to tell Sanity: "Find any sub-categories that have this top-level item as their parent!"
+        const query = encodeURIComponent(`*[_type == "categoryPage" && !defined(parentCategory) && !defined(parent) && !defined(parent_category)]{ 
+            _id, 
+            title, 
+            "slug": slug.current,
+            "children": *[_type == "categoryPage" && references(^._id)]{
+                _id,
+                title,
+                "slug": slug.current
+            }
+        }`)
+        
         const dataset = 'production'
         
         fetch(`/mobify/proxy/sanity-api/v2023-05-03/data/query/${dataset}?query=${query}`)
@@ -96,17 +105,54 @@ const AsdaHeader = () => {
                 </Flex>
             </Flex>
 
-            {/* Dynamic Sub-Navigation Links Bar (Driven by Sanity Categories) */}
+            {/* Dynamic Sub-Navigation Links Bar with Dropdowns */}
             <Box bg="#f8f9fa" borderTop="1px solid" borderColor="gray.200" px={4}>
-                <Flex maxW="container.xl" mx="auto" py={2} gap={8} fontSize="sm" fontWeight="semibold" color="gray.700" overflowX="auto">
+                <Flex maxW="container.xl" mx="auto" gap={8} fontSize="sm" fontWeight="semibold" color="gray.700">
                     {categories && categories.map((cat) => (
-                        <Link 
-                            key={cat._id} 
-                            href={`/category/${cat.slug}`} 
-                            _hover={{ color: '#78be20', textDecoration: 'none' }}
-                        >
-                            {cat.title}
-                        </Link>
+                        <Box key={cat._id} position="relative" role="group">
+                            {/* Top Level Category Link */}
+                            <Link 
+                                href={`/category/${cat.slug}`} 
+                                _hover={{ color: '#78be20', textDecoration: 'none' }}
+                                py={3} // Added padding to bridge the hover gap between text and dropdown
+                                display="block"
+                            >
+                                {cat.title}
+                            </Link>
+
+                            {/* Dropdown Menu (Only renders if the category has children) */}
+                            {cat.children && cat.children.length > 0 && (
+                                <Box 
+                                    position="absolute" 
+                                    top="100%" 
+                                    left={0} 
+                                    bg="white" 
+                                    boxShadow="lg" 
+                                    borderRadius="md" 
+                                    py={2} 
+                                    minW="220px" 
+                                    display="none" 
+                                    _groupHover={{ display: 'block' }} // Chakra UI magic: shows when parent Box is hovered
+                                    zIndex={10}
+                                    borderTop="3px solid #78be20"
+                                >
+                                    {cat.children.map(child => (
+                                        <Link 
+                                            key={child._id} 
+                                            href={`/category/${child.slug}`} 
+                                            display="block" 
+                                            px={4} 
+                                            py={2} 
+                                            fontWeight="normal"
+                                            color="gray.700" 
+                                            _hover={{ bg: 'gray.50', color: '#78be20', textDecoration: 'none' }}
+                                        >
+                                            {child.title}
+                                        </Link>
+                                    ))}
+                                </Box>
+                            )}
+                        </Box>
                     ))}
                 </Flex>
             </Box>
