@@ -6,7 +6,6 @@
  */
 import React, {useEffect, useState} from 'react'
 import {Box, Container, Text, Heading} from '@salesforce/retail-react-app/app/components/shared/ui'
-
 import Seo from '@salesforce/retail-react-app/app/components/seo'
 
 const Home = () => {
@@ -16,16 +15,19 @@ const Home = () => {
     useEffect(() => {
         const fetchHomepageContent = async () => {
             try {
-                // 1. UPDATED QUERY: Notice we are fetching layout and resolving the image URL here
+                // 1. UPDATED QUERY: Fetch the new bannerRow and its nested banners array
                 const query = encodeURIComponent(`*[_type == "homePage"][0]{
                     title,
                     homeSlots[]{
                         _type,
                         _key,
                         title,
-                        layout,
-                        linkUrl,
-                        "imageUrl": bannerImage.asset->url
+                        banners[]{
+                            _key,
+                            title,
+                            linkUrl,
+                            "imageUrl": bannerImage.asset->url
+                        }
                     }
                 }`)
 
@@ -62,57 +64,50 @@ const Home = () => {
                 ) : !homepageData?.homeSlots?.length ? (
                     <Text color="gray.500" py={4}>No homepage content found.</Text>
                 ) : (
-                    // 2. UPDATED UI: Using flexWrap to allow blocks to sit side-by-side
-                    <Box display="flex" flexWrap="wrap" mx="-2">
+                    <Box>
                         {homepageData.homeSlots.map((slot) => {
                             
-                            // Banner Block Rendering Logic
-                            if (slot._type === 'bannerBlock') {
+                            // 2. NEW BANNER ROW LOGIC: Auto-calculating widths
+                            if (slot._type === 'bannerRow' && slot.banners) {
                                 
-                                // Calculate responsive width based on the layout choice from Sanity
-                                let blockWidth = '100%'
-                                if (slot.layout === 'half') {
-                                    blockWidth = { base: '100%', md: '50%' } // Stack on mobile, side-by-side on desktop
-                                } else if (slot.layout === 'quarter') {
-                                    blockWidth = { base: '50%', md: '25%' } // 2 columns on mobile, 4 on desktop
-                                }
-                                
+                                const count = slot.banners.length
+                                let itemWidth = '100%' // Default for 1 banner
+                                if (count === 2) itemWidth = { base: '100%', md: '50%' } // 50% for 2 banners
+                                if (count === 3) itemWidth = { base: '100%', md: '33.333%' } // 33% for 3 banners
+                                if (count === 4) itemWidth = { base: '50%', md: '25%' } // 25% for 4 banners
+
                                 return (
-                                    <Box key={slot._key} w={blockWidth} p={2}>
-                                        {slot.imageUrl ? (
-                                            <Box 
-                                                as={slot.linkUrl ? 'a' : 'div'} 
-                                                href={slot.linkUrl} 
-                                                display="block"
-                                                overflow="hidden"
-                                                borderRadius="lg"
-                                                transition="transform 0.2s"
-                                                _hover={slot.linkUrl ? { transform: 'scale(1.01)' } : {}}
-                                            >
-                                                <img 
-                                                    src={slot.imageUrl} 
-                                                    alt={slot.title || 'Promotional Banner'} 
-                                                    style={{ width: '100%', height: 'auto', display: 'block' }} 
-                                                />
-                                            </Box>
-                                        ) : (
-                                            <Box p={6} bg="gray.100" borderRadius="md" border="1px dashed" borderColor="gray.300">
-                                                <Text color="gray.500">Banner missing image payload.</Text>
-                                            </Box>
-                                        )}
+                                    <Box key={slot._key} w="100%" mb={6}>
+                                        <Box display="flex" flexWrap="wrap" mx="-2">
+                                            {slot.banners.map((banner, index) => (
+                                                <Box key={banner._key || index} w={itemWidth} p={2}>
+                                                    {banner.imageUrl ? (
+                                                        <Box 
+                                                            as={banner.linkUrl ? 'a' : 'div'} 
+                                                            href={banner.linkUrl} 
+                                                            display="block"
+                                                            overflow="hidden"
+                                                            borderRadius="lg"
+                                                            transition="transform 0.2s"
+                                                            _hover={banner.linkUrl ? { transform: 'scale(1.01)' } : {}}
+                                                        >
+                                                            <img 
+                                                                // 3. THE FIX: Route the Sanity CDN URL through the local proxy
+                                                                src={banner.imageUrl.replace('https://cdn.sanity.io', '/mobify/proxy/sanity-images')} 
+                                                                alt={banner.title || 'Promotional Banner'} 
+                                                                style={{ width: '100%', height: 'auto', display: 'block' }} 
+                                                            />
+                                                        </Box>
+                                                    ) : null}
+                                                </Box>
+                                            ))}
+                                        </Box>
                                     </Box>
                                 )
                             }
 
-                            // Fallback rendering for other slot types (dealsGrid, etc.)
-                            return (
-                                <Box key={slot._key} w="100%" p={2}>
-                                    <Box p={6} bg="gray.50" borderRadius="md" borderWidth="1px">
-                                        <Heading size="md" mb={2}>{slot.title || "Untitled Section"}</Heading>
-                                        <Text fontSize="sm" color="gray.600">Component Type: <strong>{slot._type}</strong></Text>
-                                    </Box>
-                                </Box>
-                            )
+                            // Fallback for empty rows or other components
+                            return null;
                         })}
                     </Box>
                 )}
