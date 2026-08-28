@@ -4,242 +4,261 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import React, { useState, useEffect } from 'react'
-import { Box, Flex, Input, Link, Text } from '@salesforce/retail-react-app/app/components/shared/ui'
-import { SearchIcon, UserIcon, StoreIcon, ChevronRightIcon } from '@salesforce/retail-react-app/app/components/icons'
-import SanityTrolleyWidget from '../sanity-trolley-widget'
+import React, {useEffect, useState, useRef} from 'react'
+import {Box, Container, Text, Heading, Link, Button} from '@salesforce/retail-react-app/app/components/shared/ui'
+import Seo from '@salesforce/retail-react-app/app/components/seo'
 
-const AsdaHeader = () => {
-    const [navItems, setNavItems] = useState([])
-    const [activeSubCategory, setActiveSubCategory] = useState(null)
+// Sub-component to handle the left/right scroll arrows for the Deals Grid
+const DealsCarouselBlock = ({ slot }) => {
+    const scrollRef = useRef(null)
 
-    useEffect(() => {
-        const query = encodeURIComponent(`*[_type == "mainNavigation"][0]{
-            navItems[]{
-                _key,
-                label,
-                url,
-                megaMenuCategories[]{
-                    _key,
-                    categoryLabel,
-                    categoryUrl,
-                    subLinks[]{
-                        _key,
-                        label,
-                        url
-                    }
-                },
-                promoBanners[]{
-                    _key,
-                    altText,
-                    linkUrl,
-                    "imageUrl": image.asset->url
-                }
-            }
-        }`)
-        
-        const dataset = 'production'
-        
-        fetch(`/mobify/proxy/sanity-api/v2023-05-03/data/query/${dataset}?query=${query}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.result && data.result.navItems) {
-                    setNavItems(data.result.navItems)
-                }
-            })
-            .catch(err => console.error('Error fetching header navigation from Sanity proxy:', err))
-    }, [])
+    const scroll = (direction) => {
+        if (scrollRef.current) {
+            const scrollAmount = direction === 'left' ? -350 : 350
+            scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+        }
+    }
 
     return (
-        <Box w="full" bg="white" boxShadow="sm" position="sticky" top={0} zIndex={1000}>
-            {/* Top Announcement Bar */}
-            <Box bg="#78be20" color="white" py={1.5} px={4} textAlign="center" fontSize="sm" fontWeight="bold">
-                <Text>🌿 Welcome to Asda Groceries & Rollbacks — Delivered fresh to your door!</Text>
+        <Box w="100%" mb={12}>
+            <Box display="flex" justifyContent="space-between" alignItems="flex-end" mb={6}>
+                {slot.title && (
+                    <Heading as="h2" fontSize={{base: '20px', md: '24px'}} fontWeight="600" color="gray.800" borderBottom="2px solid #78be20" pb={2}>
+                        {slot.title}
+                    </Heading>
+                )}
+                
+                <Box display={{base: 'none', md: 'flex'}} gap={2}>
+                    <Button onClick={() => scroll('left')} borderRadius="full" minW="40px" h="40px" bg="gray.100" _hover={{bg: 'gray.200'}} fontSize="xl" pb={1}>‹</Button>
+                    <Button onClick={() => scroll('right')} borderRadius="full" minW="40px" h="40px" bg="gray.100" _hover={{bg: 'gray.200'}} fontSize="xl" pb={1}>›</Button>
+                </Box>
             </Box>
-
-            {/* Main Header Bar */}
-            <Flex maxW="container.xl" mx="auto" px={4} py={3} alignItems="center" justifyContent="space-between" gap={6}>
-                <Link href="/" _hover={{ textDecoration: 'none' }}>
-                    <Box bg="#78be20" color="white" px={4} py={2} borderRadius="md" fontWeight="black" fontSize="2xl" letterSpacing="wider" fontFamily="heading">
-                        ASDA
-                    </Box>
-                </Link>
-
-                <Flex flex={1} maxW="600px" position="relative" alignItems="center">
-                    <Input placeholder="Search products, rollbacks and more..." borderRadius="full" bg="gray.100" border="2px solid transparent" _focus={{ bg: 'white', borderColor: '#78be20', boxShadow: 'none' }} py={5} pl={4} pr={10} />
-                    <Box position="absolute" right={4} color="gray.500">
-                        <SearchIcon boxSize={5} />
-                    </Box>
-                </Flex>
-
-                <Flex alignItems="center" gap={6} color="gray.700">
-                    <Link href="/account" display="flex" flexDirection="column" alignItems="center" _hover={{ color: '#78be20', textDecoration: 'none' }}>
-                        <UserIcon boxSize={6} />
-                        <Text fontSize="xs" mt={1}>Sign in</Text>
-                    </Link>
-                    <Link href="/stores" display="flex" flexDirection="column" alignItems="center" _hover={{ color: '#78be20', textDecoration: 'none' }}>
-                        <StoreIcon boxSize={6} />
-                        <Text fontSize="xs" mt={1}>Stores</Text>
-                    </Link>
-                    <SanityTrolleyWidget />
-                </Flex>
-            </Flex>
-
-            {/* Dynamic Mega Menu Navigation */}
-            <Box bg="#f8f9fa" borderTop="1px solid" borderColor="gray.200" px={4}>
-                <Flex maxW="container.xl" mx="auto" gap={8} fontSize="sm" fontWeight="semibold" color="gray.700">
-                    {navItems && navItems.map((tab) => (
-                        <Box 
-                            key={tab._key} 
-                            position="relative" 
-                            role="group"
-                        >
-                            <Link href={tab.url || '#'} _hover={{ color: '#78be20', textDecoration: 'none' }} py={3} display="block">
-                                {tab.label}
-                            </Link>
-
-                            {(tab.megaMenuCategories?.length > 0 || tab.promoBanners?.length > 0) && (
-                                <Box 
-                                    position="absolute" 
-                                    top="100%" 
-                                    left={0} 
-                                    w="950px" 
-                                    bg="white" 
-                                    boxShadow="xl" 
-                                    display="none" 
-                                    _groupHover={{ display: 'flex' }} 
-                                    zIndex={10} 
-                                    borderTop="3px solid #78be20"
-                                    minH="450px"
-                                    onMouseLeave={() => setActiveSubCategory(null)} // Reset flyout when mouse leaves the dropdown
-                                >
+            
+            <Box ref={scrollRef} display="flex" overflowX="auto" scrollSnapType="x mandatory" gap={6} pb={4} sx={{ '&::-webkit-scrollbar': { display: 'none' } }}>
+                {slot.offers.map((item) => {
+                    const displayPrice = item.newPrice || item.price || item.currentPrice || 0
+                    const displayImage = item.imageUrl || item.mainImageUrl || item.productImageUrl
+                    
+                    return (
+                        <Box key={item._id} minW={{ base: '80%', md: '45%', lg: '23%' }} scrollSnapAlign="start" flexShrink={0}>
+                            <Link href={`/rollback/${item.slug}`} _hover={{textDecoration: 'none'}} display="block" height="100%">
+                                <Box bg="white" border="1px solid" borderColor="gray.200" borderRadius="8px" overflow="hidden" height="100%" display="flex" flexDirection="column" justifyContent="space-between" boxShadow="sm" transition="all 0.2s" _hover={{shadow: 'md', borderColor: '#78be20'}}>
                                     
-                                    {/* COLUMN 1: Scrolling Left Navigation */}
-                                    <Box 
-                                        w="280px" 
-                                        borderRight="1px solid" 
-                                        borderColor="gray.200" 
-                                        py={2} 
-                                        overflowY="auto" 
-                                        maxH="550px"
-                                        // Custom Asda-style Scrollbar
-                                        sx={{ 
-                                            '&::-webkit-scrollbar': { width: '6px' },
-                                            '&::-webkit-scrollbar-track': { background: '#f8f9fa' },
-                                            '&::-webkit-scrollbar-thumb': { background: '#d1d5db', borderRadius: '4px' },
-                                            '&::-webkit-scrollbar-thumb:hover': { background: '#9ca3af' }
-                                        }}
-                                    >
-                                        {tab.megaMenuCategories && tab.megaMenuCategories.map(cat => (
-                                            <Box 
-                                                key={cat._key} 
-                                                onMouseEnter={() => setActiveSubCategory(cat._key)}
-                                                bg={activeSubCategory === cat._key ? 'gray.50' : 'transparent'}
-                                            >
-                                                <Flex 
-                                                    as={Link} 
-                                                    href={cat.categoryUrl || '#'} 
-                                                    align="center" 
-                                                    justify="space-between" 
-                                                    px={4} 
-                                                    py={2.5} 
-                                                    _hover={{ textDecoration: 'none', color: '#78be20' }}
-                                                    color={activeSubCategory === cat._key ? '#78be20' : 'gray.700'}
-                                                >
-                                                    <Text fontWeight="normal">{cat.categoryLabel}</Text>
-                                                    {cat.subLinks && cat.subLinks.length > 0 && (
-                                                        <ChevronRightIcon boxSize={4} />
-                                                    )}
-                                                </Flex>
-                                            </Box>
-                                        ))}
-                                    </Box>
-
-                                    {/* COLUMN 2: True Flyout Overlap (Only visible on hover) */}
-                                    {tab.megaMenuCategories && tab.megaMenuCategories.map(cat => (
-                                        <Box 
-                                            key={`sub-${cat._key}`}
-                                            display={activeSubCategory === cat._key ? 'block' : 'none'}
-                                            position="absolute"
-                                            top={0}
-                                            left="280px" // Docks exactly next to the left column
-                                            w="280px"
-                                            h="full"
-                                            bg="white"
-                                            boxShadow="6px 0 10px -4px rgba(0,0,0,0.1)" // Shadow makes it look like it's floating over the banners
-                                            zIndex={20}
-                                            py={2}
-                                            borderRight="1px solid" 
-                                            borderColor="gray.200"
-                                        >
-                                            {cat.subLinks && cat.subLinks.map(sub => (
-                                                <Link 
-                                                    key={sub._key} 
-                                                    href={sub.url || '#'} 
-                                                    display="block" 
-                                                    px={5} 
-                                                    py={2} 
-                                                    fontWeight="normal"
-                                                    _hover={{ bg: 'gray.50', color: '#78be20', textDecoration: 'none' }}
-                                                >
-                                                    {sub.label}
-                                                </Link>
-                                            ))}
+                                    {displayImage && (
+                                        <Box position="relative" w="full" pb="70%" bg="gray.50">
+                                            <img src={displayImage.replace('https://cdn.sanity.io', '/mobify/proxy/sanity-images')} alt={item.title} style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain', padding: '20px'}} />
                                         </Box>
-                                    ))}
-
-                                    {/* COLUMN 3: Mixed-Size Promo Banners */}
-                                    <Box flex={1} bg="gray.50" p={6}>
-                                        {tab.promoBanners && tab.promoBanners.length > 0 ? (
-                                            <Box 
-                                                display="grid" 
-                                                // If 4 images, make a 3-column grid for the bottom row. Otherwise, 2 columns.
-                                                gridTemplateColumns={tab.promoBanners.length === 4 ? "repeat(3, 1fr)" : "repeat(2, 1fr)"} 
-                                                gap={4}
-                                            >
-                                                {tab.promoBanners.map((promo, index) => (
-                                                    <Box 
-                                                        key={promo._key || index} 
-                                                        // First image always spans the entire width of the container
-                                                        gridColumn={index === 0 ? '1 / -1' : 'span 1'}
-                                                    >
-                                                        <Link href={promo.linkUrl || '#'} _hover={{ textDecoration: 'none' }} display="block" h="100%">
-                                                            <Box 
-                                                                overflow="hidden" 
-                                                                borderRadius="md" 
-                                                                h="100%"
-                                                                transition="transform 0.2s, box-shadow 0.2s" 
-                                                                _hover={{ transform: 'scale(1.02)', shadow: 'md' }}
-                                                            >
-                                                                {promo.imageUrl && (
-                                                                    <img 
-                                                                        src={promo.imageUrl.replace('https://cdn.sanity.io', '/mobify/proxy/sanity-images')} 
-                                                                        alt={promo.altText || 'Promotion'} 
-                                                                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
-                                                                    />
-                                                                )}
-                                                            </Box>
-                                                        </Link>
-                                                    </Box>
-                                                ))}
+                                    )}
+                                    
+                                    <Box p={5} display="flex" flexDirection="column" flex="1" justifyContent="space-between">
+                                        <Box>
+                                            {item.badgeText && (
+                                                <Text bg="#78be20" color="white" px={2.5} py={0.5} borderRadius="full" fontSize="xs" fontWeight="bold" width="fit-content" mb={3}>{item.badgeText}</Text>
+                                            )}
+                                            <Heading size="sm" color="gray.900" mb={3} noOfLines={2}>{item.title}</Heading>
+                                            <Box display="flex" alignItems="baseline" gap={2} mb={4}>
+                                                <Text fontSize="2xl" fontWeight="black" color="#00a1de">£{Number(displayPrice).toFixed(2)}</Text>
+                                                {item.oldPrice && (
+                                                    <Text fontSize="sm" textDecoration="line-through" color="gray.500">Was £{Number(item.oldPrice).toFixed(2)}</Text>
+                                                )}
                                             </Box>
-                                        ) : (
-                                            <Flex justify="center" align="center" h="full">
-                                                <Text color="gray.400" fontSize="sm">No promotional banners configured.</Text>
-                                            </Flex>
-                                        )}
+                                        </Box>
+                                        
+                                        <Button bg="#78be20" color="white" width="full" size="sm" fontWeight="bold" _hover={{bg: '#6aa61b'}}>{item.ctaText || 'View Rollback'} ›</Button>
                                     </Box>
-
                                 </Box>
-                            )}
+                            </Link>
                         </Box>
-                    ))}
-                </Flex>
+                    )
+                })}
             </Box>
         </Box>
     )
 }
 
-AsdaHeader.getTemplateName = () => 'AsdaHeader'
+const Home = () => {
+    const [homepageData, setHomepageData] = useState(null)
+    const [loading, setLoading] = useState(true)
 
-export default AsdaHeader
+    useEffect(() => {
+        const fetchHomepageContent = async () => {
+            try {
+                // The query is updated here to pull the 'subtitle' for your new Super Deals banner row
+                const query = encodeURIComponent(`*[_type == "homePage"][0]{
+                    title,
+                    homeSlots[]{
+                        _type,
+                        _key,
+                        title,
+                        subtitle,
+                        slides[]{
+                            _key,
+                            headline,
+                            subheadline,
+                            ctaText,
+                            linkUrl,
+                            "imageUrl": heroImage.asset->url
+                        },
+                        banners[]{
+                            _key,
+                            title,
+                            linkUrl,
+                            "imageUrl": bannerImage.asset->url
+                        },
+                        offers[]->{
+                            _id,
+                            title,
+                            "slug": slug.current,
+                            oldPrice,
+                            newPrice,
+                            price,
+                            currentPrice,
+                            badgeText,
+                            ctaText,
+                            "imageUrl": image.asset->url,
+                            "mainImageUrl": mainImage.asset->url,
+                            "productImageUrl": productImage.asset->url
+                        }
+                    }
+                }`)
+
+                const res = await fetch(`/mobify/proxy/sanity-api/v2023-05-03/data/query/production?query=${query}`)
+                const data = await res.json()
+                
+                if (data.result) {
+                    setHomepageData(data.result)
+                }
+            } catch (err) {
+                console.error('Error fetching homepage slots from Sanity:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchHomepageContent()
+    }, [])
+
+    return (
+        <Box data-testid="home-page" layerStyle="page" bg="white" minH="100vh">
+            <Seo
+                title={homepageData?.title || "Online Food Shopping - ASDA Groceries"}
+                description="Shop online at ASDA Groceries. Powered by Sanity CMS."
+            />
+
+            <Container maxW="1432px" mx="auto" px={4} py={8}>
+                <Heading as="h1" fontSize={{base: '24px', md: '28px'}} fontWeight="bold" color="gray.800" mb={6}>
+                    {homepageData?.title || "Home"}
+                </Heading>
+
+                {loading ? (
+                    <Text color="gray.500" py={4}>Loading live homepage from Sanity...</Text>
+                ) : !homepageData?.homeSlots?.length ? (
+                    <Text color="gray.500" py={4}>No homepage content found.</Text>
+                ) : (
+                    <Box>
+                        {homepageData.homeSlots.map((slot) => {
+                            
+                            // 1. BOOK A SLOT LOGIC
+                            if (slot._type === 'bookASlotBlock') {
+                                return (
+                                    <Box key={slot._key} w="100%" mb={12} bg="#f9f9f9" borderRadius="lg" p={6} display="flex" flexDirection={{base: 'column', md: 'row'}} alignItems="center" justifyContent="space-between" borderLeft="4px solid #78be20" boxShadow="sm">
+                                        <Box mb={{base: 4, md: 0}}>
+                                            <Heading as="h3" size="md" color="gray.900" mb={1}>{slot.title || 'Book a delivery or collection slot'}</Heading>
+                                            {slot.subtitle && <Text color="gray.600" fontSize="sm">{slot.subtitle}</Text>}
+                                        </Box>
+                                        <Button bg="#78be20" color="white" _hover={{bg: '#6aa61b'}} px={8} size="md" fontWeight="bold">
+                                            Book slot
+                                        </Button>
+                                    </Box>
+                                )
+                            }
+
+                            // 2. HERO CARD CAROUSEL LOGIC
+                            if (slot._type === 'heroCardCarousel') {
+                                if (!slot.slides || slot.slides.length === 0) return null;
+
+                                return (
+                                    <Box key={slot._key} w="100%" mb={12}>
+                                        <Box display="flex" overflowX="auto" scrollSnapType="x mandatory" gap={4} pb={4} sx={{ '&::-webkit-scrollbar': { display: 'none' } }}>
+                                            {slot.slides.map((slide, index) => (
+                                                <Box key={slide._key || index} minW={{ base: '100%', md: '80%', lg: '65%' }} scrollSnapAlign="center" position="relative" borderRadius="xl" overflow="hidden" minH="350px" display="flex" alignItems="center" p={10}>
+                                                    {slide.imageUrl && (
+                                                        <Box position="absolute" top={0} left={0} right={0} bottom={0} zIndex={-1}>
+                                                            <img src={slide.imageUrl.replace('https://cdn.sanity.io', '/mobify/proxy/sanity-images')} alt="" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                                                            <Box position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.500" /> 
+                                                        </Box>
+                                                    )}
+                                                    <Box color="white" maxW="xl" zIndex={1}>
+                                                        {slide.headline && <Heading as="h2" size="2xl" mb={4} fontWeight="black" lineHeight="1.1">{slide.headline}</Heading>}
+                                                        {slide.subheadline && <Text fontSize="xl" mb={6} fontWeight="medium">{slide.subheadline}</Text>}
+                                                        {slide.ctaText && (
+                                                            <Button as={slide.linkUrl ? "a" : "button"} href={slide.linkUrl || "#"} bg="#78be20" color="white" size="lg" fontWeight="bold" _hover={{bg: '#6aa61b', textDecoration: 'none'}}>
+                                                                {slide.ctaText}
+                                                            </Button>
+                                                        )}
+                                                    </Box>
+                                                </Box>
+                                            ))}
+                                        </Box>
+                                    </Box>
+                                )
+                            }
+
+                            // 3. BANNER ROW LOGIC (Now renders Title and Subtitle for "Super Deals")
+                            if (slot._type === 'bannerRow' && slot.banners) {
+                                const count = slot.banners.length
+                                let itemWidth = '100%'
+                                if (count === 2) itemWidth = { base: '100%', md: '50%' }
+                                if (count === 3) itemWidth = { base: '100%', md: '33.333%' }
+                                if (count === 4) itemWidth = { base: '50%', md: '25%' }
+
+                                return (
+                                    <Box key={slot._key} w="100%" mb={12}>
+                                        
+                                        {/* Render Title and Subtitle */}
+                                        <Box mb={6}>
+                                            {slot.title && (
+                                                <Heading as="h2" fontSize={{base: '20px', md: '24px'}} fontWeight="700" color="gray.700" mb={1}>
+                                                    {slot.title}
+                                                </Heading>
+                                            )}
+                                            {slot.subtitle && (
+                                                <Text color="gray.600" fontSize="sm" fontWeight="bold">
+                                                    {slot.subtitle}
+                                                </Text>
+                                            )}
+                                        </Box>
+                                        
+                                        {/* Render Images */}
+                                        <Box display="flex" flexWrap="wrap" mx="-2">
+                                            {slot.banners.map((banner, index) => (
+                                                <Box key={banner._key || index} w={itemWidth} p={2}>
+                                                    {banner.imageUrl && (
+                                                        <Box as={banner.linkUrl ? 'a' : 'div'} href={banner.linkUrl} display="block" overflow="hidden" borderRadius="lg" transition="transform 0.2s" _hover={banner.linkUrl ? { transform: 'scale(1.01)' } : {}}>
+                                                            <img src={banner.imageUrl.replace('https://cdn.sanity.io', '/mobify/proxy/sanity-images')} alt={banner.title || 'Promotional Banner'} style={{ width: '100%', height: 'auto', display: 'block' }} />
+                                                        </Box>
+                                                    )}
+                                                </Box>
+                                            ))}
+                                        </Box>
+                                    </Box>
+                                )
+                            }
+
+                            // 4. DEALS CAROUSEL LOGIC
+                            if (slot._type === 'dealsGrid' && slot.offers) {
+                                return <DealsCarouselBlock key={slot._key} slot={slot} />
+                            }
+
+                            return null;
+                        })}
+                    </Box>
+                )}
+            </Container>
+        </Box>
+    )
+}
+
+Home.getTemplateName = () => 'home'
+
+export default Home
