@@ -83,7 +83,6 @@ const Home = () => {
     useEffect(() => {
         const fetchHomepageContent = async () => {
             try {
-                // ADDED 'subtitle' to the query for the Book A Slot block
                 const query = encodeURIComponent(`*[_type == "homePage"][0]{
                     title,
                     homeSlots[]{
@@ -175,14 +174,7 @@ const Home = () => {
 
                             // 2. HERO CARD CAROUSEL LOGIC
                             if (slot._type === 'heroCardCarousel') {
-                                // If block is placed but no slides are added yet, show a placeholder
-                                if (!slot.slides || slot.slides.length === 0) {
-                                    return (
-                                        <Box key={slot._key} p={6} bg="gray.50" border="1px dashed" borderColor="gray.300" mb={12} borderRadius="md">
-                                            <Text color="gray.500">Hero Carousel placed here. Add slides in Sanity to see them.</Text>
-                                        </Box>
-                                    )
-                                }
+                                if (!slot.slides || slot.slides.length === 0) return null;
 
                                 return (
                                     <Box key={slot._key} w="100%" mb={12}>
@@ -211,7 +203,7 @@ const Home = () => {
                                 )
                             }
 
-                            // 3. BANNER ROW LOGIC
+                            // 3. BANNER ROW LOGIC 
                             if (slot._type === 'bannerRow' && slot.banners) {
                                 const count = slot.banners.length
                                 let itemWidth = '100%'
@@ -221,7 +213,22 @@ const Home = () => {
 
                                 return (
                                     <Box key={slot._key} w="100%" mb={12}>
-                                        {slot.title && <Heading as="h2" fontSize="xl" mb={4} color="gray.800">{slot.title}</Heading>}
+                                        
+                                        {/* Render Title and Subtitle */}
+                                        <Box mb={6}>
+                                            {slot.title && (
+                                                <Heading as="h2" fontSize={{base: '20px', md: '24px'}} fontWeight="700" color="gray.700" mb={1}>
+                                                    {slot.title}
+                                                </Heading>
+                                            )}
+                                            {slot.subtitle && (
+                                                <Text color="gray.600" fontSize="sm" fontWeight="bold">
+                                                    {slot.subtitle}
+                                                </Text>
+                                            )}
+                                        </Box>
+                                        
+                                        {/* Render Images */}
                                         <Box display="flex" flexWrap="wrap" mx="-2">
                                             {slot.banners.map((banner, index) => (
                                                 <Box key={banner._key || index} w={itemWidth} p={2}>
