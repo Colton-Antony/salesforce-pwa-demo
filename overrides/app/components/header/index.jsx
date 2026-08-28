@@ -5,7 +5,7 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import React, { useState, useEffect } from 'react'
-import { Box, Flex, Input, Link, Text, SimpleGrid } from '@salesforce/retail-react-app/app/components/shared/ui'
+import { Box, Flex, Input, Link, Text } from '@salesforce/retail-react-app/app/components/shared/ui'
 import { SearchIcon, UserIcon, StoreIcon, ChevronRightIcon } from '@salesforce/retail-react-app/app/components/icons'
 import SanityTrolleyWidget from '../sanity-trolley-widget'
 
@@ -14,7 +14,6 @@ const AsdaHeader = () => {
     const [activeSubCategory, setActiveSubCategory] = useState(null)
 
     useEffect(() => {
-        // Fetch the new Main Navigation schema including the mega menu categories and promo banners
         const query = encodeURIComponent(`*[_type == "mainNavigation"][0]{
             navItems[]{
                 _key,
@@ -94,15 +93,11 @@ const AsdaHeader = () => {
                             key={tab._key} 
                             position="relative" 
                             role="group"
-                            // Reset sub-category state when entering a new top-level tab
-                            onMouseEnter={() => setActiveSubCategory(null)}
                         >
-                            {/* LEVEL 1: Top Nav Tab (e.g., Groceries) */}
                             <Link href={tab.url || '#'} _hover={{ color: '#78be20', textDecoration: 'none' }} py={3} display="block">
                                 {tab.label}
                             </Link>
 
-                            {/* MEGA MENU DROPDOWN (Activates on tab hover) */}
                             {(tab.megaMenuCategories?.length > 0 || tab.promoBanners?.length > 0) && (
                                 <Box 
                                     position="absolute" 
@@ -116,10 +111,25 @@ const AsdaHeader = () => {
                                     zIndex={10} 
                                     borderTop="3px solid #78be20"
                                     minH="450px"
+                                    onMouseLeave={() => setActiveSubCategory(null)} // Reset flyout when mouse leaves the dropdown
                                 >
                                     
-                                    {/* COLUMN 1: Department Categories (Left) */}
-                                    <Box w="280px" borderRight="1px solid" borderColor="gray.200" py={2} overflowY="auto" maxH="600px">
+                                    {/* COLUMN 1: Scrolling Left Navigation */}
+                                    <Box 
+                                        w="280px" 
+                                        borderRight="1px solid" 
+                                        borderColor="gray.200" 
+                                        py={2} 
+                                        overflowY="auto" 
+                                        maxH="550px"
+                                        // Custom Asda-style Scrollbar
+                                        sx={{ 
+                                            '&::-webkit-scrollbar': { width: '6px' },
+                                            '&::-webkit-scrollbar-track': { background: '#f8f9fa' },
+                                            '&::-webkit-scrollbar-thumb': { background: '#d1d5db', borderRadius: '4px' },
+                                            '&::-webkit-scrollbar-thumb:hover': { background: '#9ca3af' }
+                                        }}
+                                    >
                                         {tab.megaMenuCategories && tab.megaMenuCategories.map(cat => (
                                             <Box 
                                                 key={cat._key} 
@@ -145,60 +155,74 @@ const AsdaHeader = () => {
                                         ))}
                                     </Box>
 
-                                    {/* COLUMN 2: Sub-links Flyout (Middle) */}
-                                    <Box w="280px" bg="white" borderRight="1px solid" borderColor="gray.200" py={2} position="relative">
-                                        {tab.megaMenuCategories && tab.megaMenuCategories.map(cat => (
-                                            <Box 
-                                                key={`sub-${cat._key}`}
-                                                display={activeSubCategory === cat._key ? 'block' : 'none'}
-                                                position="absolute"
-                                                top={0}
-                                                left={0}
-                                                w="full"
-                                                h="full"
-                                                overflowY="auto"
-                                                pt={2}
-                                            >
-                                                {cat.subLinks && cat.subLinks.map(sub => (
-                                                    <Link 
-                                                        key={sub._key} 
-                                                        href={sub.url || '#'} 
-                                                        display="block" 
-                                                        px={5} 
-                                                        py={2} 
-                                                        fontWeight="normal"
-                                                        _hover={{ bg: 'gray.50', color: '#78be20', textDecoration: 'none' }}
-                                                    >
-                                                        {sub.label}
-                                                    </Link>
-                                                ))}
-                                            </Box>
-                                        ))}
-                                    </Box>
+                                    {/* COLUMN 2: True Flyout Overlap (Only visible on hover) */}
+                                    {tab.megaMenuCategories && tab.megaMenuCategories.map(cat => (
+                                        <Box 
+                                            key={`sub-${cat._key}`}
+                                            display={activeSubCategory === cat._key ? 'block' : 'none'}
+                                            position="absolute"
+                                            top={0}
+                                            left="280px" // Docks exactly next to the left column
+                                            w="280px"
+                                            h="full"
+                                            bg="white"
+                                            boxShadow="6px 0 10px -4px rgba(0,0,0,0.1)" // Shadow makes it look like it's floating over the banners
+                                            zIndex={20}
+                                            py={2}
+                                            borderRight="1px solid" 
+                                            borderColor="gray.200"
+                                        >
+                                            {cat.subLinks && cat.subLinks.map(sub => (
+                                                <Link 
+                                                    key={sub._key} 
+                                                    href={sub.url || '#'} 
+                                                    display="block" 
+                                                    px={5} 
+                                                    py={2} 
+                                                    fontWeight="normal"
+                                                    _hover={{ bg: 'gray.50', color: '#78be20', textDecoration: 'none' }}
+                                                >
+                                                    {sub.label}
+                                                </Link>
+                                            ))}
+                                        </Box>
+                                    ))}
 
-                                    {/* COLUMN 3: Promotional Image Grid (Right) */}
+                                    {/* COLUMN 3: Mixed-Size Promo Banners */}
                                     <Box flex={1} bg="gray.50" p={6}>
                                         {tab.promoBanners && tab.promoBanners.length > 0 ? (
-                                            <SimpleGrid columns={tab.promoBanners.length > 1 ? 2 : 1} spacing={4}>
+                                            <Box 
+                                                display="grid" 
+                                                // If 4 images, make a 3-column grid for the bottom row. Otherwise, 2 columns.
+                                                gridTemplateColumns={tab.promoBanners.length === 4 ? "repeat(3, 1fr)" : "repeat(2, 1fr)"} 
+                                                gap={4}
+                                            >
                                                 {tab.promoBanners.map((promo, index) => (
-                                                    <Link key={promo._key || index} href={promo.linkUrl || '#'} _hover={{ textDecoration: 'none' }}>
-                                                        <Box 
-                                                            overflow="hidden" 
-                                                            borderRadius="md" 
-                                                            transition="transform 0.2s, box-shadow 0.2s" 
-                                                            _hover={{ transform: 'scale(1.02)', shadow: 'md' }}
-                                                        >
-                                                            {promo.imageUrl && (
-                                                                <img 
-                                                                    src={promo.imageUrl.replace('https://cdn.sanity.io', '/mobify/proxy/sanity-images')} 
-                                                                    alt={promo.altText || 'Promotion'} 
-                                                                    style={{ width: '100%', height: 'auto', display: 'block' }} 
-                                                                />
-                                                            )}
-                                                        </Box>
-                                                    </Link>
+                                                    <Box 
+                                                        key={promo._key || index} 
+                                                        // First image always spans the entire width of the container
+                                                        gridColumn={index === 0 ? '1 / -1' : 'span 1'}
+                                                    >
+                                                        <Link href={promo.linkUrl || '#'} _hover={{ textDecoration: 'none' }} display="block" h="100%">
+                                                            <Box 
+                                                                overflow="hidden" 
+                                                                borderRadius="md" 
+                                                                h="100%"
+                                                                transition="transform 0.2s, box-shadow 0.2s" 
+                                                                _hover={{ transform: 'scale(1.02)', shadow: 'md' }}
+                                                            >
+                                                                {promo.imageUrl && (
+                                                                    <img 
+                                                                        src={promo.imageUrl.replace('https://cdn.sanity.io', '/mobify/proxy/sanity-images')} 
+                                                                        alt={promo.altText || 'Promotion'} 
+                                                                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
+                                                                    />
+                                                                )}
+                                                            </Box>
+                                                        </Link>
+                                                    </Box>
                                                 ))}
-                                            </SimpleGrid>
+                                            </Box>
                                         ) : (
                                             <Flex justify="center" align="center" h="full">
                                                 <Text color="gray.400" fontSize="sm">No promotional banners configured.</Text>
